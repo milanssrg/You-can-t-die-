@@ -1,0 +1,86 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>YOU CAN'T DIE — Demo 0.1</title>
+<style>
+*{box-sizing:border-box}body{margin:0;background:#15130f;color:#eee;font-family:Georgia,serif}
+#app{max-width:1100px;margin:auto;padding:12px}.top{display:flex;justify-content:space-between;align-items:center;gap:8px}
+h1{margin:0;font-size:28px;letter-spacing:2px}.stats{display:flex;gap:7px;flex-wrap:wrap}.stat{background:#28231d;border:1px solid #6b5a43;border-radius:9px;padding:7px 10px}
+.scene{position:relative;height:480px;overflow:hidden;border:2px solid #6b5a43;border-radius:12px;
+background:linear-gradient(#59675a 0 45%,#38452f 45% 100%)}
+.cloud{position:absolute;background:#8c9987;border-radius:50%;width:180px;height:45px;top:50px;left:8%;opacity:.35}
+.mtn{position:absolute;bottom:40%;left:-5%;width:110%;height:55%;background:#42453c;clip-path:polygon(0 100%,13% 55%,25% 76%,45% 15%,61% 67%,76% 34%,100% 100%);opacity:.9}
+.water{position:absolute;bottom:0;right:0;width:40%;height:28%;background:#315d64;border-top:4px solid #4e7773}
+.tree{position:absolute;font-size:44px}.t1{left:5%;bottom:24%}.t2{left:18%;bottom:31%}.t3{right:44%;bottom:18%}.t4{right:5%;bottom:28%}
+.hero{position:absolute;left:43%;bottom:25%;font-size:62px;filter:drop-shadow(3px 4px 0 #222)}
+.lion{position:absolute;left:52%;bottom:23%;font-size:55px}.lady{position:absolute;left:10%;bottom:23%;font-size:55px}
+.monster{position:absolute;right:8%;bottom:28%;font-size:65px}.chest{position:absolute;left:4%;bottom:13%;font-size:42px}
+.name{position:absolute;bottom:10px;left:50%;transform:translateX(-50%);background:#18130fdd;padding:6px 12px;border-radius:8px}
+.panel{background:#211c17;border:1px solid #6b5a43;border-radius:12px;padding:11px;margin-top:10px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.buttons{display:flex;flex-wrap:wrap;gap:7px}
+button{font-family:inherit;font-weight:bold;color:#fff;background:#624d38;border:1px solid #a18867;border-radius:8px;padding:10px 12px}
+button:hover{filter:brightness(1.2)}.danger{background:#713c38}.good{background:#405c42}
+.log{height:115px;overflow:auto;background:#0e0d0b;padding:8px;border-radius:7px;font-size:14px}
+.inv{display:grid;grid-template-columns:repeat(4,1fr);gap:5px;margin-top:7px}.slot{min-height:42px;border:1px dashed #76624a;border-radius:6px;padding:5px;font-size:12px}
+.bar{height:9px;background:#352f28;border-radius:6px;overflow:hidden;margin:5px 0}.fill{height:100%;width:100%;background:#839b6b}
+.small{font-size:12px;color:#bdb4a6}
+@media(max-width:700px){.grid{grid-template-columns:1fr}.scene{height:400px}.hero{font-size:52px}.lion{font-size:45px}.monster{font-size:52px}}
+</style>
+</head>
+<body>
+<div id="app">
+<div class="top"><h1>YOU CAN'T DIE</h1><div class="stats">
+<div class="stat">❤️ <b id="hp">500</b>/500</div><div class="stat">☠️ <b id="deaths">0</b>/100</div><div class="stat">🪙 <b id="coins">0</b></div>
+</div></div>
+
+<div class="scene">
+<div class="cloud"></div><div class="mtn"></div><div class="water"></div>
+<div class="tree t1">🌲</div><div class="tree t2">🌿</div><div class="tree t3">🌴</div><div class="tree t4">🌲</div>
+<div class="lady">👠</div><div class="hero">🧙‍♀️</div><div class="lion">🦁</div><div class="monster">🦖</div><div class="chest">🧰</div>
+<div class="name">Mundo 1 · La Era Primitiva</div>
+</div>
+
+<div class="grid">
+<div class="panel"><b>🏘️ Lady Vespera</b><p class="small">La primera Vecina te recibe en el mundo.</p>
+<div class="buttons"><button class="good" onclick="meetLady()">Hablar</button><button onclick="mapGift()">🗺️ Ver mapa</button></div></div>
+<div class="panel"><b>🐾 León de las Cavernas</b><p class="small">❤️ Vida: <span id="lionhp">300</span>/300 · 💥 Fuerza: 100</p>
+<button onclick="feed()">🥩 Dar carne</button></div>
+</div>
+
+<div class="panel"><b>🎒 Inventario · 8 espacios</b><div class="inv" id="inv"></div>
+<div class="buttons" style="margin-top:8px">
+<button onclick="getSword()">⚔️ Usar Espada de Luz</button><button onclick="getBow()">🏹 Usar Arco de Robin Hood</button><button onclick="getTrident()">🔱 Usar Tridente de Tritón</button>
+<button class="danger" onclick="hit()">💥 Recibir golpe</button><button onclick="die()">🪦 Simular muerte</button>
+</div></div>
+
+<div class="panel"><b>🛡️ Armadura</b><div class="small">Defensa 200 · 10 golpes</div>
+<div class="bar"><div class="fill" id="armor"></div></div><div class="small">Resistencia: <span id="armorN">10</span>/10</div></div>
+
+<div class="panel"><b>📜 Registro de aventura</b><div class="log" id="log">Has llegado al Mundo 1... Lady Vespera te observa desde el camino.<br></div></div>
+</div>
+
+<script>
+let hp=500,deaths=0,coins=0,lion=300,armor=10;
+let inv=[];let sword=600,bow=2000,trident=1000;
+const $=id=>document.getElementById(id);
+function log(x){$("log").innerHTML+=x+"<br>";$("log").scrollTop=$("log").scrollHeight}
+function update(){
+ $("hp").textContent=hp;$("deaths").textContent=deaths;$("coins").textContent=coins;$("lionhp").textContent=lion;
+ $("armorN").textContent=armor;$("armor").style.width=(armor*10)+"%";
+ $("inv").innerHTML=Array.from({length:8},(_,i)=>`<div class="slot">${inv[i]||"Vacío"}</div>`).join("");
+}
+function add(x){if(inv.length>=8){log("🎒 Inventario lleno.");return false}inv.push(x);update();return true}
+function meetLady(){log("🖤 Lady Vespera: «Bienvenida. Este mundo es mucho más grande de lo que parece.»");}
+function mapGift(){if(!inv.includes("🗺️ Mapa")){if(add("🗺️ Mapa"))log("🗺️ Lady Vespera te entrega un mapa del Mundo 1.");}else log("🗺️ Ya tienes el mapa.");}
+function feed(){lion=Math.min(300,lion+60);log("🥩 Alimentaste al León de las Cavernas. Su vida vuelve a "+lion+"/300.");update()}
+function getSword(){if(sword<=0)return log("💥 La Espada de Luz está rota.");sword=Math.max(0,sword-200);log("⚔️ Espada de Luz: 200 de daño. Poder "+sword+"/600.");if(sword===0)log("💥 ¡Espada de Luz rota!");update()}
+function getBow(){if(bow<=0)return log("💥 El Arco de Robin Hood está roto.");bow=Math.max(0,bow-150);log("🏹 Arco de Robin Hood: 150 de daño a monstruos. Poder "+bow+"/2000.");if(bow===0)log("💥 ¡Arco roto!");update()}
+function getTrident(){if(trident<=0)return log("💥 El Tridente de Tritón está roto.");trident=Math.max(0,trident-200);log("🔱 Tridente de Tritón: 200 de daño a monstruos grandes. Poder "+trident+"/1000.");if(trident===0)log("💥 ¡Tridente roto!");update()}
+function hit(){if(armor>0){armor--;log("🛡️ La armadura absorbe el golpe. Resistencia "+armor+"/10.");}else{hp-=100;log("💥 Recibes 100 de daño.");if(hp<=0)die()}update()}
+function die(){deaths++;log("☠️ Has muerto. Tus objetos caen donde moriste y quedan expuestos durante 3 días.");hp=500;armor=10;if(deaths>=100){log("💀 100/100 MUERTES: REINICIO TOTAL.");deaths=0;coins=0;inv=[];sword=600;bow=2000;trident=1000;lion=300;log("🌎 Todo tu progreso se ha reiniciado.");}update()}
+update();
+</script>
+</body>
+</html>
