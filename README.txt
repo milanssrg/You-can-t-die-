@@ -1,1 +1,3 @@
-YOU CAN'T DIE v0.4 PRO — subir todos los archivos juntos a la raíz del repositorio.
+YOU CAN'T DIE — Visual Slice v0.5 FLAT
+Todos los archivos van juntos en la raíz de GitHub Pages.
+Sube index.html + todas las imágenes/archivos juntos.
